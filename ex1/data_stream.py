@@ -16,10 +16,10 @@ class DataStream(ABC):
 
 
 class SensorStream(DataStream):
-    def __init__(self, stream_id:str):
+    def __init__(self, stream_id: str):
         self.stream_id = stream_id
-        self.__sensor_report = 0
-        self.__avg_t = []
+        self.sensor_report = 0
+        self.avg_t = []
 
     def process_batch(self, data_batch: List[tuple]) -> str:
         try:
@@ -28,26 +28,27 @@ class SensorStream(DataStream):
 {type(data_batch)}")
 
             for data in data_batch:
-                if (isinstance(data, tuple) is False or data[0] not in
-                    ["temp", "humidity", "pressure"]):
-                    raise Exception(f"Error, invalide data type")
+                if (isinstance(data, tuple) is False or data[0]
+                   not in ["temp", "humidity", "presure"]):
+                    raise Exception("Error, invalide data type")
                 float(data[1])
-                self.__sensor_report += 1
-                self.__avg_t.append(data[1])
+                self.sensor_report += 1
+                if (data[0] == "temp"):
+                    self.avg_t.append(data[1])
 
         except (Exception, ValueError) as e:
-           print(e)
-           return "0 readings"
+            print(e)
+            return "0 readings"
         else:
-            return f"{self.__sensor_report} readings"
+            return f"{self.sensor_report} readings"
 
-    def filter_data(self, data_batch: List[tuple], 
+    def filter_data(self, data_batch: List[tuple],
                     criteria: Optional[str] = None):
-        return [data for data in data_batch if data[0] in 
-                ["temp", "humidity", "pressure"]]
+        return [data for data in data_batch if data[0] in
+                ["temp", "humidity", "presure"]]
 
     def get_stats(self):
-        return sum(self.__avg_t) / len(self.__avg_t)
+        return sum(self.avg_t) / len(self.avg_t)
 
 
 class TransactionStream(DataStream):
@@ -80,6 +81,8 @@ if (__name__ == "__main__"):
     sensor_stream = SensorStream("SENSOR_001")
     print(f"Stream ID: {sensor_stream.stream_id}, Type: Environmental Data")
     data_batch_filtered = sensor_stream.filter_data(data_batch)
-    data_batch_stats = sensor_stream.get_stats()
-    print(f"Processing sensor batch: {data_batch_filtered}")
-    print(f"Sensor analysis: {sensor_stream.process_batch(data_batch_filtered)} processed, avg tem: {data_batch_stats}")
+    print(f"Processing sensor batch: [{"".join(f"{x}:{y}," for x, y in data_batch_filtered)}]")
+    print(f"Sensor analysis: {sensor_stream.process_batch(data_batch_filtered)} processed, avg tem: {sensor_stream.get_stats()}°C")
+
+    print("Initializing Transaction Stream ...")
+    
