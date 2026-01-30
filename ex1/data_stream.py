@@ -3,6 +3,7 @@
 Includes stream implementations for sensors, transactions, and events,
 plus a processor to orchestrate them through a unified interface.
 
+credit:
 all docstring made by IA
 """
 
